@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化学元素クイズ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        #quizSection {
+            display: none;
+        }
+
+        #question {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        #options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>化学元素クイズ</h1>
+        <div id="modeSelection">
+            <label><input type="radio" name="mode" value="practice" checked> 練習モード</label>
+            <label><input type="radio" name="mode" value="test"> テストモード</label>
+        </div>
+        <button onclick="startGame()" id="startButton">ゲーム開始</button>
+
+        <div id="quizSection">
+            <div id="question"></div>
+            <div id="options"></div>
+            <p id="result"></p>
+        </div>
+    </div>
+
+    <script>
+        const elements = [
+            { name: "水素", symbol: "H" },
+            { name: "酸素", symbol: "O" },
+            { name: "炭素", symbol: "C" },
+            { name: "硫黄", symbol: "S" },
+            { name: "鉄", symbol: "Fe" },
+            { name: "銅", symbol: "Cu" },
+            { name: "銀", symbol: "Ag" },
+            { name: "ナトリウム", symbol: "Na" },
+            { name: "カルシウム", symbol: "Ca" },
+            { name: "マグネシウム", symbol: "Mg" }
+        ];
+
+        let currentElementIndex = 0;
+        let numCorrect = 0;
+        let mode = "practice"; // 初期は練習モード
+
+        function startGame() {
+            document.getElementById("modeSelection").style.display = "none";
+            document.getElementById("quizSection").style.display = "block";
+            document.getElementById("startButton").style.display = "none";
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const questionDiv = document.getElementById("question");
+            const randomIndex = Math.floor(Math.random() * elements.length);
+            const currentElement = elements[randomIndex];
+            questionDiv.textContent = `${currentElement.symbol}の元素名は？`;
+
+            const optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+
+            const options = getRandomOptions(currentElement.name, 2); // 正解を含む選択肢を3つ作成
+            options.push(currentElement.name); // 正解の元素名を追加してシャッフルする
+
+            const shuffledOptions = shuffleArray(options);
+            shuffledOptions.forEach(name => {
+                const button = document.createElement("button");
+                button.textContent = name;
+                button.onclick = () => checkAnswer(name);
+                optionsDiv.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedName) {
+            const correctName = elements[currentElementIndex].name;
+            const resultDiv = document.getElementById("result");
+
+            if (selectedName === correctName) {
+                numCorrect++;
+                resultDiv.textContent = "正解！🎉";
+            } else {
+                resultDiv.textContent = `不正解 😞 正解は ${correctName} (${elements[currentElementIndex].symbol})`;
+            }
+
+            currentElementIndex++;
+            if (currentElementIndex < elements.length) {
+                displayQuestion();
+            } else {
+                const scorePercentage = (numCorrect / elements.length) * 100;
+                resultDiv.textContent = `クイズ終了！正答率は ${scorePercentage.toFixed(1)}% (${numCorrect}/${elements.length})`;
+                document.getElementById("options").style.display = "none"; // 選択肢を非表示にする
+            }
+        }
+
+        function getRandomOptions(correctName, numOptions) {
+            const options = [];
+            while (options.length < numOptions) {
+                const randomIndex = Math.floor(Math.random() * elements.length);
+                const randomName = elements[randomIndex].name;
+                if (randomName !== correctName && !options.includes(randomName)) {
+                    options.push(randomName);
+                }
+            }
+            return options;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
