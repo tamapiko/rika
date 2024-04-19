@@ -54,6 +54,12 @@
             background-color: #0056b3;
         }
 
+        #inputAnswer {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
         #result {
             font-size: 18px;
             margin-top: 20px;
@@ -72,6 +78,8 @@
         <div id="quizSection">
             <div id="question"></div>
             <div id="options"></div>
+            <input type="text" id="inputAnswer" placeholder="ここに化学記号を入力">
+            <button onclick="checkInputAnswer()">回答する</button>
             <p id="result"></p>
         </div>
     </div>
@@ -95,6 +103,7 @@
         let mode = "practice"; // 初期は練習モード
 
         function startGame() {
+            mode = document.querySelector('input[name="mode"]:checked').value;
             document.getElementById("modeSelection").style.display = "none";
             document.getElementById("quizSection").style.display = "block";
             document.getElementById("startButton").style.display = "none";
@@ -104,32 +113,42 @@
         function displayQuestion() {
             const questionDiv = document.getElementById("question");
             const currentElement = elements[currentElementIndex];
-            questionDiv.textContent = `${currentElement.symbol}の元素名は？`;
 
-            const optionsDiv = document.getElementById("options");
-            optionsDiv.innerHTML = "";
+            if (mode === "practice") {
+                questionDiv.textContent = `${currentElement.name}の化学記号は？`;
 
-            const options = getRandomOptions(currentElement.name, 2); // 正解を含む選択肢を3つ作成
-            options.push(currentElement.name); // 正解の元素名を追加してシャッフルする
+                const optionsDiv = document.getElementById("options");
+                optionsDiv.innerHTML = "";
 
-            const shuffledOptions = shuffleArray(options);
-            shuffledOptions.forEach(name => {
-                const button = document.createElement("button");
-                button.textContent = name;
-                button.onclick = () => checkAnswer(name);
-                optionsDiv.appendChild(button);
-            });
+                const correctSymbol = currentElement.symbol;
+                const options = getRandomOptions(correctSymbol, 2); // 正解を含む選択肢を2つ作成
+                options.push(correctSymbol); // 正解の化学記号を追加してシャッフルする
+
+                const shuffledOptions = shuffleArray(options);
+                shuffledOptions.forEach(symbol => {
+                    const button = document.createElement("button");
+                    button.textContent = symbol;
+                    button.onclick = () => checkAnswer(symbol);
+                    optionsDiv.appendChild(button);
+                });
+
+                document.getElementById("inputAnswer").style.display = "none";
+            } else if (mode === "test") {
+                questionDiv.textContent = `${currentElement.name}の元素名を入力してください：`;
+                document.getElementById("options").innerHTML = "";
+                document.getElementById("inputAnswer").style.display = "inline";
+            }
         }
 
-        function checkAnswer(selectedName) {
-            const correctName = elements[currentElementIndex].name;
+        function checkAnswer(selectedSymbol) {
+            const correctSymbol = elements[currentElementIndex].symbol;
             const resultDiv = document.getElementById("result");
 
-            if (selectedName === correctName) {
+            if (selectedSymbol === correctSymbol) {
                 numCorrect++;
                 resultDiv.textContent = "正解！🎉";
             } else {
-                resultDiv.textContent = `不正解 😞 正解は ${correctName} (${elements[currentElementIndex].symbol})`;
+                resultDiv.textContent = `不正解 😞 正解は ${correctSymbol} (${elements[currentElementIndex].name})`;
             }
 
             currentElementIndex++;
@@ -138,17 +157,40 @@
             } else {
                 const scorePercentage = (numCorrect / elements.length) * 100;
                 resultDiv.textContent = `クイズ終了！正答率は ${scorePercentage.toFixed(1)}% (${numCorrect}/${elements.length})`;
-                document.getElementById("options").style.display = "none"; // 選択肢を非表示にする
+                document.getElementById("inputAnswer").style.display = "none";
             }
         }
 
-        function getRandomOptions(correctName, numOptions) {
+        function checkInputAnswer() {
+            const inputAnswer = document.getElementById("inputAnswer").value.toUpperCase();
+            const correctName = elements[currentElementIndex].name;
+            const resultDiv = document.getElementById("result");
+
+            if (inputAnswer === correctName) {
+                numCorrect++;
+                resultDiv.textContent = "正解！🎉";
+            } else {
+                const correctSymbol = elements[currentElementIndex].symbol;
+                resultDiv.textContent = `不正解 😞 正解は ${correctSymbol} (${correctName})`;
+            }
+
+            currentElementIndex++;
+            if (currentElementIndex < elements.length) {
+                displayQuestion();
+            } else {
+                const scorePercentage = (numCorrect / elements.length) * 100;
+                resultDiv.textContent = `クイズ終了！正答率は ${scorePercentage.toFixed(1)}% (${numCorrect}/${elements.length})`;
+                document.getElementById("inputAnswer").style.display = "none";
+            }
+        }
+
+        function getRandomOptions(correctSymbol, numOptions) {
             const options = [];
             while (options.length < numOptions) {
                 const randomIndex = Math.floor(Math.random() * elements.length);
-                const randomName = elements[randomIndex].name;
-                if (randomName !== correctName && !options.includes(randomName)) {
-                    options.push(randomName);
+                const randomSymbol = elements[randomIndex].symbol;
+                if (randomSymbol !== correctSymbol && !options.includes(randomSymbol)) {
+                    options.push(randomSymbol);
                 }
             }
             return options;
