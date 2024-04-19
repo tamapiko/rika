@@ -103,8 +103,7 @@
 
         function displayQuestion() {
             const questionDiv = document.getElementById("question");
-            const randomIndex = Math.floor(Math.random() * elements.length);
-            const currentElement = elements[randomIndex];
+            const currentElement = elements[currentElementIndex];
             questionDiv.textContent = `${currentElement.symbol}の元素名は？`;
 
             const optionsDiv = document.getElementById("options");
